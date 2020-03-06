@@ -30,7 +30,7 @@ namespace AdvancedSupportForEnums {
             private RepositoryItem CreateRepositoryItem() {
                 RepositoryItemLookUpEdit item = new RepositoryItemLookUpEdit();
                 item.NullText = "[Select Pay Grade]";
-                item.DataSource = Program.PayGrades;
+                item.DataSource = new XPCollection<PayGrade>();
                 item.DisplayMember = "Name";
                 item.Columns.Add(new LookUpColumnInfo("Name"));
                 item.Columns.Add(new LookUpColumnInfo("Low", "Low", 40, FormatType.Numeric, "c", true, HorzAlignment.Near));
@@ -78,10 +78,9 @@ namespace AdvancedSupportForEnums {
                     int oid = -1;
                     Int32.TryParse(value, out oid);
                     if (oid > 0)
-                        return Program.PayGrades.Session.GetObjectByKey(typeof(PayGrade), oid);
+                        return XpoDefault.Session.GetObjectByKey(typeof(PayGrade), oid);
                     else {
-                        //PayGrade payGrade = (PayGrade)Program.PayGrades.Session.FindObject(typeof(PayGrade), CriteriaOperator.Parse($"Name='{0}'", value));
-                        PayGrade payGrade = (PayGrade)Program.PayGrades.FirstOrDefault(x => x.Name == value);
+                        PayGrade payGrade = (PayGrade)XpoDefault.Session.FindObject(typeof(PayGrade), CriteriaOperator.Parse("Name=?", value));
                         return payGrade;
                     }
                 }

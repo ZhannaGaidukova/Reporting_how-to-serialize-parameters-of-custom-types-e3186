@@ -22,7 +22,7 @@ namespace AdvancedSupportForEnums {
 
             FillDataSource();
             XPCollection<Person> dataSource = new XPCollection<Person>();
-            XpoDefault.DataLayer = new SimpleDataLayer(new DevExpress.Xpo.DB.InMemoryDataStore());            
+         
             report = new XtraReport();
             report.DataSource = dataSource;
 
@@ -84,7 +84,7 @@ namespace AdvancedSupportForEnums {
         }
 
         private static PayGrade GetPayType(string payTypeName) {
-            return (PayGrade)Program.PayGrades.Session.FindObject(typeof(PayGrade), CriteriaOperator.Parse($"Name='{0}'", payTypeName));            
+            return (PayGrade)XpoDefault.Session.FindObject(typeof(PayGrade), CriteriaOperator.Parse("Name=?", payTypeName));            
         }
 
         private void btnDesigner_Click(object sender, EventArgs e) {
