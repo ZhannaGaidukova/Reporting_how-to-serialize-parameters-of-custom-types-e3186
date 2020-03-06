@@ -1,32 +1,32 @@
 ﻿using System;
-using System.IO;
 using System.Windows.Forms;
-using System.Collections.Generic;
 using DevExpress.Xpo;
 using DevExpress.XtraReports.UI;
 using DevExpress.XtraReports.Extensions;
+using System.Linq;
+using DevExpress.Data.Filtering;
 // ...
 
 namespace AdvancedSupportForEnums {
     public partial class Form1 : Form {
         static Form1() {
-            ReportDesignExtension.RegisterExtension(new CustomReportExtension(), TeamParameterName);
+            ReportDesignExtension.RegisterExtension(new CustomReportExtension(), PersonEnums);
             CustomReportStorageExtension.RegisterExtensionGlobal(new CustomReportStorageExtension());
         }
 
         private XtraReport report;
-        private const string TeamParameterName = "Team";
+        private const string PersonEnums = "PersonEnums";
 
         public Form1() {
             InitializeComponent();
 
             FillDataSource();
             XPCollection<Person> dataSource = new XPCollection<Person>();
-
+            XpoDefault.DataLayer = new SimpleDataLayer(new DevExpress.Xpo.DB.InMemoryDataStore());            
             report = new XtraReport();
             report.DataSource = dataSource;
 
-            ReportDesignExtension.AssociateReportWithExtension(report, TeamParameterName);
+            ReportDesignExtension.AssociateReportWithExtension(report, PersonEnums);
         }
 
         private void FillDataSource() {
@@ -42,74 +42,53 @@ namespace AdvancedSupportForEnums {
                     FirstName = "Name 1, team1",
                     Team = team1,
                     DateOfBirth = DateTime.Now.AddYears(-1),
-                    Gender = PersonGender.Mr
+                    Gender = PersonGender.Mr,
+                    Pay = GetPayType("Billionaire")
                 }.Save();
                 new Person() {
                     FirstName = "Name 1, team2",
                     Team = team2,
                     DateOfBirth = DateTime.Now,
-                    Gender = PersonGender.Mrs
+                    Gender = PersonGender.Mrs,
+                    Pay = GetPayType("Good")
                 }.Save();
                 new Person() {
                     FirstName = "Name 1, team3",
                     Team = team3,
                     DateOfBirth = DateTime.Now,
-                    Gender = PersonGender.Mrs
+                    Gender = PersonGender.Mrs,
+                    Pay = GetPayType("Low")
                 }.Save();
                 new Person() {
                     FirstName = "Name 2, team1",
                     Team = team1,
                     DateOfBirth = DateTime.Now.AddYears(-1),
-                    Gender = PersonGender.Mr
+                    Gender = PersonGender.Mr,
+                    Pay = GetPayType("Good")
                 }.Save();
                 new Person() {
                     FirstName = "Name 2, team2",
                     Team = team2,
                     DateOfBirth = DateTime.Now,
-                    Gender = PersonGender.Mrs
+                    Gender = PersonGender.Mrs,
+                    Pay = GetPayType("Decent")
                 }.Save();
                 new Person() {
                     FirstName = "Name 2, team3",
                     Team = team3,
                     DateOfBirth = DateTime.Now,
-                    Gender = PersonGender.Mrs
+                    Gender = PersonGender.Mrs,
+                    Pay = GetPayType("Low")
                 }.Save();
             }
         }
 
+        private static PayGrade GetPayType(string payTypeName) {
+            return (PayGrade)Program.PayGrades.Session.FindObject(typeof(PayGrade), CriteriaOperator.Parse($"Name='{0}'", payTypeName));            
+        }
+
         private void btnDesigner_Click(object sender, EventArgs e) {
             report.ShowDesignerDialog();
-        }
-
-        class CustomReportExtension : ReportDesignExtension {
-            public CustomReportExtension() {
-            }
-
-            public override void AddParameterTypes(IDictionary<Type, string> dictionary) {
-                dictionary.Add(typeof(PersonGender), "Person's Gender");
-            }
-
-            protected override bool CanSerialize(object data) {
-                return data is PersonGender;
-            }
-            protected override string SerializeData(object data, XtraReport report) {
-                return Enum.GetName(typeof(PersonGender), data);
-            }
-            protected override bool CanDeserialize(string value, string typeName) {
-                return typeof(PersonGender).FullName == typeName;
-            }
-            protected override object DeserializeData(string value, string typeName, XtraReport report) {
-                return Enum.Parse(typeof(PersonGender), value);
-            }
-        }
-
-        class CustomReportStorageExtension : ReportStorageExtension {
-            public override void SetData(XtraReport report, Stream stream) {
-                report.SaveLayoutToXml(stream);
-            }
-            public override void SetData(XtraReport report, string url) {
-                report.SaveLayoutToXml(url);
-            }
         }
     }
 }
